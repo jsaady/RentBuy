@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rent or Buy Calculator</title>
+</head>
+<body>
+    <h1>Rent or Buy Calculator</h1>
+    <form id="calcForm">
+        <label for="homePrice">Home Price ($):</label>
+        <input type="number" id="homePrice" required><br><br>
+
+        <label for="monthlyHOA">Monthly HOA Fee ($):</label>
+        <input type="number" id="monthlyHOA" required><br><br>
+
+        <label for="monthlyRent">Average Monthly Rent ($):</label>
+        <input type="number" id="monthlyRent" required><br><br>
+
+        <label for="interestRate">Interest Rate (%):</label>
+        <input type="number" id="interestRate" step="0.01" required><br><br>
+
+        <button type="button" onclick="calculateDecision()">Calculate</button>
+    </form>
+
+    <h2 id="result"></h2>
+
+    <script>
+        function calculateAnnualMortgagePayment(homePrice, interestRate, loanTermYears) {
+            let loanAmount = homePrice;
+            let monthlyInterestRate = interestRate / 12 / 100;
+            let numberOfPayments = loanTermYears * 12;
+
+            let monthlyPayment = (loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -numberOfPayments));
+            let annualPayment = monthlyPayment * 12;
+            return annualPayment;
+        }
+
+        function calculatePriceToRentRatio(homePrice, monthlyHOA, monthlyRent, interestRate) {
+            const loanTermYears = 30;  // Typical mortgage term
+            const annualRent = monthlyRent * 12;
+            const annualHOA = monthlyHOA * 12;
+            const annualMortgagePayment = calculateAnnualMortgagePayment(homePrice, interestRate, loanTermYears);
+
+            const totalAnnualCost = annualMortgagePayment + annualHOA;
+            const adjustedPriceToRentRatio = totalAnnualCost / annualRent;
+
+            return adjustedPriceToRentRatio;
+        }
+
+        function shouldBuyOrRent(homePrice, monthlyHOA, monthlyRent, interestRate) {
+            const ratio = calculatePriceToRentRatio(homePrice, monthlyHOA, monthlyRent, interestRate);
+            if (ratio < 15) {
+                return "Buy";
+            } else if (ratio >= 15 && ratio <= 20) {
+                return "Consider Both Options";
+            } else {
+                return "Rent";
+            }
+        }
+
+        function calculateDecision() {
+            const homePrice = parseFloat(document.getElementById('homePrice').value);
+            const monthlyHOA = parseFloat(document.getElementById('monthlyHOA').value);
+            const monthlyRent = parseFloat(document.getElementById('monthlyRent').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value);
+
+            const decision = shouldBuyOrRent(homePrice, monthlyHOA, monthlyRent, interestRate);
+            document.getElementById('result').innerText = `Based on the inputs, it is better to: ${decision}`;
+        }
+    </script>
+</body>
+</html>
